@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -14,6 +15,17 @@ from sklearn.metrics import classification_report
 
 data = pd.read_csv("data/train.csv")
 x_test = pd.read_csv("data/test.csv")
+
+def clean_text(text):
+  text = text.lower()
+  text = re.sub(r"http\S+|www\S+", "", text)
+  text = re.sub(r'@\w+', '', text)
+  text = re.sub(r"[^a-zA-Z\s]", "", text)
+  text = text.strip()
+  return text
+
+data["text"] = data["text"].apply(clean_text)
+x_test["text"] = x_test["text"].apply(clean_text)
 
 # plt.figure(figsize=(6, 4))
 # sns.histplot(data[data["target"] == 0]["location"], color="blue", label="Not Disaster", kde=True)
@@ -58,11 +70,10 @@ randomForestParams = {
   "model__max_depth": [None, 2],
 }
 
-svcParams = {
-  "model__C": [1.0, 2.0],
-  "model__kernel": ["linear", "poly", "rbf"],
-}
-
+# svcParams = {
+#   "model__C": [1.0, 2.0],
+#   "model__kernel": ["linear", "poly", "rbf"],
+# }
 
 grid_search = GridSearchCV(estimator=cls, param_grid=randomForestParams, cv=4, scoring="accuracy", verbose=2, n_jobs=-1)
 grid_search.fit(x_train, y_train)
