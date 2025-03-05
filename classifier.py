@@ -1,3 +1,5 @@
+import nltk
+nltk.data.path.append('./nltk_data')
 import re
 import pandas as pd
 import seaborn as sns
@@ -12,9 +14,12 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
+from nltk.stem import WordNetLemmatizer
 
 data = pd.read_csv("data/train.csv")
 x_test = pd.read_csv("data/test.csv")
+
+lemmatizer = WordNetLemmatizer()
 
 def clean_text(text):
   text = text.lower()
@@ -22,10 +27,13 @@ def clean_text(text):
   text = re.sub(r'@\w+', '', text)
   text = re.sub(r"[^a-zA-Z\s]", "", text)
   text = text.strip()
+  text = " ".join([lemmatizer.lemmatize(word) for word in text.split()])
   return text
 
 data["text"] = data["text"].apply(clean_text)
 x_test["text"] = x_test["text"].apply(clean_text)
+
+print(data)
 
 # plt.figure(figsize=(6, 4))
 # sns.histplot(data[data["target"] == 0]["location"], color="blue", label="Not Disaster", kde=True)
